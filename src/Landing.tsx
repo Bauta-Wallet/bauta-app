@@ -68,7 +68,7 @@ export default function Landing() {
           </a>{" "}
           private balances,
           <br />
-          auto-shield and full stealth scanning.
+          auto-shield and much more.
           <br />
         </p>
 
