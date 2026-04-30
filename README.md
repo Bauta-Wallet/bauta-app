@@ -39,7 +39,7 @@ VITE_RELAY_URL    # URL of bauta-relay instance (default: official relay)
 
 ## Related
 
-- [bauta-wallet](https://github.com/ivanmmurciaua/bauta-wallet) — self-host service (stealth wallet + watcher + relay + RAILGUN)
+- [bauta-wallet](https://github.com/Bauta-Wallet/bauta-wallet) — self-host service (stealth wallet + watcher + relay + RAILGUN)
 - [bauta-lookup-ipfs](https://codeberg.org/ivanmmurcia/bauta-lookup) — IPFS version (no relay, fully decentralized)
 
 ## License

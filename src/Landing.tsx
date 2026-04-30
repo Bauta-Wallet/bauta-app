@@ -101,7 +101,7 @@ export default function Landing() {
           </button>
 
           <a
-            href="https://github.com/ivanmmurciaua/bauta-wallet"
+            href="https://github.com/Bauta-Wallet/bauta-wallet"
             target="_blank"
             rel="noopener noreferrer"
             style={{
