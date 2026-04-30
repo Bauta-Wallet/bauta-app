@@ -31,7 +31,7 @@ import {
 const queryClient = new QueryClient();
 
 const DEFAULT_RELAY_URL =
-  import.meta.env.VITE_RELAY_URL ?? "https://142.93.229.46:8767";
+  import.meta.env.VITE_RELAY_URL ?? "https://164.90.195.82:8767";
 const RELAY_STORAGE_KEY = "bauta_relay_url";
 
 interface RegistryHit {
