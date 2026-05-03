@@ -31,7 +31,7 @@ import {
 const queryClient = new QueryClient();
 
 const DEFAULT_RELAY_URL =
-  import.meta.env.VITE_RELAY_URL ?? "https://164.90.195.82:8767";
+  import.meta.env.VITE_RELAY_URL ?? "https://relay.bautawallet.com";
 const RELAY_STORAGE_KEY = "bauta_relay_url";
 
 interface RegistryHit {
@@ -242,7 +242,7 @@ function LookupApp() {
         }
       } catch {
         pollFailCount.current += 1;
-        if (pollFailCount.current >= 3) setRelayUnreachable(true);
+        if (pollFailCount.current >= 1) setRelayUnreachable(true);
       }
     }, 10_000);
 
