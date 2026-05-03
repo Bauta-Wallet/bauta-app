@@ -822,7 +822,7 @@ function LookupApp() {
                 {relayAlive === null
                   ? "checking relay…"
                   : relayAlive
-                    ? "Send from any wallet. Relay handles the announce."
+                    ? "No wallet needed. Send from anywhere, relay handles the rest."
                     : "Relay unavailable."}
               </p>
             </button>
