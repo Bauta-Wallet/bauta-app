@@ -33,6 +33,15 @@ const queryClient = new QueryClient();
 const DEFAULT_RELAY_URL =
   import.meta.env.VITE_RELAY_URL ?? "https://relay.bautawallet.com";
 const RELAY_STORAGE_KEY = "bauta_relay_url";
+const WATCH_CACHE_KEY   = "bauta_active_watch";
+
+interface WatchCache {
+  watchId:             string;
+  relayStealthAddress: string;
+  feeBps:              number;
+  chainId:             number;
+  relayUrl:            string;
+}
 
 interface RegistryHit {
   chainId: number;
@@ -70,15 +79,21 @@ function LookupApp() {
   const [scanDone, setScanDone] = useState(false);
   const [scanError, setScanError] = useState<string | null>(null);
 
+  // ── Cache restore — read once on init ────────────────────────────────────────
+  const [cache] = useState<WatchCache | null>(() => {
+    try {
+      const raw = localStorage.getItem(WATCH_CACHE_KEY);
+      return raw ? (JSON.parse(raw) as WatchCache) : null;
+    } catch { localStorage.removeItem(WATCH_CACHE_KEY); return null; }
+  });
+
   // ── Stealth result ───────────────────────────────────────────────────────────
-  const [selectedChain, setSelectedChain] = useState<number | null>(null);
+  const [selectedChain, setSelectedChain] = useState<number | null>(cache?.chainId ?? null);
   const [chainExpanded, setChainExpanded] = useState(false);
-  const [stealthResult, setStealthResult] = useState<StealthResult | null>(
-    null,
-  );
+  const [stealthResult, setStealthResult] = useState<StealthResult | null>(null);
 
   // ── Send mode ────────────────────────────────────────────────────────────────
-  const [sendMode, setSendMode] = useState<SendMode>("none");
+  const [sendMode, setSendMode] = useState<SendMode>(cache ? "gasless" : "none");
 
   // ── Wallet path ──────────────────────────────────────────────────────────────
   const [amount, setAmount] = useState("");
@@ -103,22 +118,19 @@ function LookupApp() {
   };
 
   // ── Gasless path ─────────────────────────────────────────────────────────────
-  const [gaslessStatus, setGaslessStatus] = useState<GaslessStatus>("idle");
-  const [relayStealthAddress, setRelayStealthAddress] = useState<string | null>(
-    null,
-  );
-  const [feeBps, setFeeBps] = useState<number | null>(null);
-  const [realStealthRevealed, setRealStealthRevealed] = useState<string | null>(
-    null,
-  );
+  const [gaslessStatus, setGaslessStatus] = useState<GaslessStatus>(cache ? "watching" : "idle");
+  const [relayStealthAddress, setRelayStealthAddress] = useState<string | null>(cache?.relayStealthAddress ?? null);
+  const [feeBps, setFeeBps] = useState<number | null>(cache?.feeBps ?? null);
+  const [realStealthRevealed, setRealStealthRevealed] = useState<string | null>(null);
   const [gaslessTx, setGaslessTx] = useState<string | null>(null);
   const [gaslessError, setGaslessError] = useState<string | null>(null);
-  const [watchId, setWatchId] = useState<string | null>(null);
+  const [watchId, setWatchId] = useState<string | null>(cache?.watchId ?? null);
   const [relayCopied, setRelayCopied] = useState(false);
   const [relayUnreachable, setRelayUnreachable] = useState(false);
-  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const pollRef       = useRef<ReturnType<typeof setInterval> | null>(null);
   const pollFailCount = useRef(0);
-  const pendingSend = useRef(false);
+  const pendingSend   = useRef(false);
+  const skipResetRef  = useRef(cache !== null); // skip reset on mount if restoring
 
   const cancelWatch = (id: string | null) => {
     if (!id) return;
@@ -163,6 +175,7 @@ function LookupApp() {
 
   // ── Reset send state when chain changes ──────────────────────────────────────
   useEffect(() => {
+    if (skipResetRef.current) return;
     setSendMode("none");
     setSentTx(null);
     setSendError(null);
@@ -202,6 +215,46 @@ function LookupApp() {
       .catch(() => setRelayAlive(false));
   }, [stealthResult, selectedChain, relayUrl]);
 
+  // ── Verify restored watch on mount ───────────────────────────────────────────
+  useEffect(() => {
+    if (!cache) return;
+
+    const clear = () => {
+      localStorage.removeItem(WATCH_CACHE_KEY);
+      skipResetRef.current = false;
+      setSendMode("none");
+      setGaslessStatus("idle");
+      setRelayStealthAddress(null);
+      setFeeBps(null);
+      setWatchId(null);
+      setSelectedChain(null);
+    };
+
+    fetch(`${cache.relayUrl}/watch/${cache.watchId}`)
+      .then(async r => {
+        skipResetRef.current = false;
+        if (r.status === 404) { clear(); return; }
+        if (!r.ok) return;
+        const data = await r.json();
+
+        if (data.status === "announced") {
+          setGaslessTx(data.announce_tx_hash);
+          setRealStealthRevealed(data.real_stealth_address);
+          setGaslessStatus("announced");
+          setWatchId(null);
+          localStorage.removeItem(WATCH_CACHE_KEY);
+        } else if (data.status === "received") {
+          setGaslessStatus("received");
+        } else if (["forwarding", "forwarded", "fee_pending"].includes(data.status)) {
+          setGaslessStatus("forwarding");
+        } else {
+          setGaslessStatus("watching");
+        }
+      })
+      .catch(() => { clear(); });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // ── Gasless init — triggered when user selects "without wallet" ─────────────
   useEffect(() => {
     if (sendMode !== "gasless" || !stealthResult || !selectedChain) return;
@@ -233,12 +286,15 @@ function LookupApp() {
           setRealStealthRevealed(data.real_stealth_address);
           setGaslessStatus("announced");
           setWatchId(null);
+          localStorage.removeItem(WATCH_CACHE_KEY);
         }
+        if (data.status === "fee_pending") setGaslessStatus("forwarding");
         if (data.status === "failed") {
           if (pollRef.current) clearInterval(pollRef.current);
           setGaslessError("Relay failed — your funds are recoverable.");
           setGaslessStatus("failed");
           setWatchId(null);
+          localStorage.removeItem(WATCH_CACHE_KEY);
         }
       } catch {
         pollFailCount.current += 1;
@@ -346,6 +402,13 @@ function LookupApp() {
       setWatchId(watch_id);
       setRelayStealthAddress(relay_stealth_address);
       setFeeBps(fee_bps);
+      localStorage.setItem(WATCH_CACHE_KEY, JSON.stringify({
+        watchId:             watch_id,
+        relayStealthAddress: relay_stealth_address,
+        feeBps:              fee_bps,
+        chainId:             selectedChain,
+        relayUrl,
+      } satisfies WatchCache));
     } catch (e: unknown) {
       setGaslessError(
         (e as { message?: string })?.message ?? "Relay unavailable",
@@ -855,7 +918,7 @@ function LookupApp() {
         )}
 
         {/* ── Gasless path ─────────────────────────────────────────────────────── */}
-        {sendMode === "gasless" && stealthResult && selectedChain && (
+        {sendMode === "gasless" && (stealthResult || relayStealthAddress) && selectedChain && (
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {/* Phase 1: connecting to relay */}
             {gaslessStatus === "idle" && (
@@ -1096,6 +1159,7 @@ function LookupApp() {
                         setSendMode("none");
                         setGaslessStatus("idle");
                         setRelayStealthAddress(null);
+                        localStorage.removeItem(WATCH_CACHE_KEY);
                       }}
                       style={{
                         alignSelf: "flex-start",
