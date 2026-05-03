@@ -1067,7 +1067,7 @@ function LookupApp() {
                         <span style={{ color: "#818cf8" }}>
                           {selectedChainInfo?.label}
                         </span>{" "}
-                        · polling every 15s
+                        · checking every 15s
                       </p>
                     </div>
                   )}
@@ -1127,29 +1127,18 @@ function LookupApp() {
                     </div>
                   )}
 
-                  <div
-                    style={{
-                      padding: "10px 14px",
-                      background: "#100800",
-                      border: "1px solid #6b3a00",
-                      borderRadius: 6,
-                      display: "flex",
-                      gap: 10,
-                    }}
-                  >
-                    <span style={{ flexShrink: 0 }}>⚠</span>
-                    <p
-                      style={{
-                        fontSize: 10,
-                        color: "#f59e0b",
-                        lineHeight: 1.8,
-                      }}
-                    >
-                      {gaslessStatus === "watching"
-                        ? "Keep this tab open while you send ETH from your other wallet."
-                        : "Don't close this tab — relay is in progress."}
-                    </p>
-                  </div>
+
+                  {gaslessStatus === "watching" && (
+                    <div style={{ padding: "8px 12px", background: "#0a0e1a", border: "1px solid #1e3a5f", borderRadius: 6, fontSize: 10, color: "#60a5fa", lineHeight: 1.7 }}>
+                      ℹ Send to the address above from any wallet.
+                    </div>
+                  )}
+
+                  {(gaslessStatus === "received" || gaslessStatus === "forwarding") && (
+                    <div style={{ padding: "8px 12px", background: "#0a0e1a", border: "1px solid #1e3a5f", borderRadius: 6, fontSize: 10, color: "#60a5fa", lineHeight: 1.7 }}>
+                      ℹ Relay is processing your payment — this may take a minute.
+                    </div>
+                  )}
 
                   {gaslessStatus === "watching" && (
                     <button
