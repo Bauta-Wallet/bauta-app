@@ -251,7 +251,12 @@ function LookupApp() {
           setGaslessStatus("watching");
         }
       })
-      .catch(() => { clear(); });
+      .catch(() => {
+        // Network error — relay may be down, keep cache and show watching state
+        skipResetRef.current = false;
+        setGaslessStatus("watching");
+        setRelayUnreachable(true);
+      });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
