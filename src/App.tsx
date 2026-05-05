@@ -33,14 +33,14 @@ const queryClient = new QueryClient();
 const DEFAULT_RELAY_URL =
   import.meta.env.VITE_RELAY_URL ?? "https://relay.bautawallet.com";
 const RELAY_STORAGE_KEY = "bauta_relay_url";
-const WATCH_CACHE_KEY   = "bauta_active_watch";
+const WATCH_CACHE_KEY = "bauta_active_watch";
 
 interface WatchCache {
-  watchId:             string;
+  watchId: string;
   relayStealthAddress: string;
-  feeBps:              number;
-  chainId:             number;
-  relayUrl:            string;
+  feeBps: number;
+  chainId: number;
+  relayUrl: string;
 }
 
 interface RegistryHit {
@@ -84,16 +84,25 @@ function LookupApp() {
     try {
       const raw = localStorage.getItem(WATCH_CACHE_KEY);
       return raw ? (JSON.parse(raw) as WatchCache) : null;
-    } catch { localStorage.removeItem(WATCH_CACHE_KEY); return null; }
+    } catch {
+      localStorage.removeItem(WATCH_CACHE_KEY);
+      return null;
+    }
   });
 
   // ── Stealth result ───────────────────────────────────────────────────────────
-  const [selectedChain, setSelectedChain] = useState<number | null>(cache?.chainId ?? null);
+  const [selectedChain, setSelectedChain] = useState<number | null>(
+    cache?.chainId ?? null,
+  );
   const [chainExpanded, setChainExpanded] = useState(false);
-  const [stealthResult, setStealthResult] = useState<StealthResult | null>(null);
+  const [stealthResult, setStealthResult] = useState<StealthResult | null>(
+    null,
+  );
 
   // ── Send mode ────────────────────────────────────────────────────────────────
-  const [sendMode, setSendMode] = useState<SendMode>(cache ? "gasless" : "none");
+  const [sendMode, setSendMode] = useState<SendMode>(
+    cache ? "gasless" : "none",
+  );
 
   // ── Wallet path ──────────────────────────────────────────────────────────────
   const [amount, setAmount] = useState("");
@@ -118,19 +127,25 @@ function LookupApp() {
   };
 
   // ── Gasless path ─────────────────────────────────────────────────────────────
-  const [gaslessStatus, setGaslessStatus] = useState<GaslessStatus>(cache ? "watching" : "idle");
-  const [relayStealthAddress, setRelayStealthAddress] = useState<string | null>(cache?.relayStealthAddress ?? null);
+  const [gaslessStatus, setGaslessStatus] = useState<GaslessStatus>(
+    cache ? "watching" : "idle",
+  );
+  const [relayStealthAddress, setRelayStealthAddress] = useState<string | null>(
+    cache?.relayStealthAddress ?? null,
+  );
   const [feeBps, setFeeBps] = useState<number | null>(cache?.feeBps ?? null);
-  const [realStealthRevealed, setRealStealthRevealed] = useState<string | null>(null);
+  const [realStealthRevealed, setRealStealthRevealed] = useState<string | null>(
+    null,
+  );
   const [gaslessTx, setGaslessTx] = useState<string | null>(null);
   const [gaslessError, setGaslessError] = useState<string | null>(null);
   const [watchId, setWatchId] = useState<string | null>(cache?.watchId ?? null);
   const [relayCopied, setRelayCopied] = useState(false);
   const [relayUnreachable, setRelayUnreachable] = useState(false);
-  const pollRef       = useRef<ReturnType<typeof setInterval> | null>(null);
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const pollFailCount = useRef(0);
-  const pendingSend   = useRef(false);
-  const skipResetRef  = useRef(cache !== null); // skip reset on mount if restoring
+  const pendingSend = useRef(false);
+  const skipResetRef = useRef(cache !== null); // skip reset on mount if restoring
 
   const cancelWatch = (id: string | null) => {
     if (!id) return;
@@ -231,9 +246,12 @@ function LookupApp() {
     };
 
     fetch(`${cache.relayUrl}/watch/${cache.watchId}`)
-      .then(async r => {
+      .then(async (r) => {
         skipResetRef.current = false;
-        if (r.status === 404) { clear(); return; }
+        if (r.status === 404) {
+          clear();
+          return;
+        }
         if (!r.ok) return;
         const data = await r.json();
 
@@ -245,7 +263,9 @@ function LookupApp() {
           localStorage.removeItem(WATCH_CACHE_KEY);
         } else if (data.status === "received") {
           setGaslessStatus("received");
-        } else if (["forwarding", "forwarded", "fee_pending"].includes(data.status)) {
+        } else if (
+          ["forwarding", "forwarded", "fee_pending"].includes(data.status)
+        ) {
           setGaslessStatus("forwarding");
         } else {
           setGaslessStatus("watching");
@@ -257,7 +277,7 @@ function LookupApp() {
         setGaslessStatus("watching");
         setRelayUnreachable(true);
       });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // ── Gasless init — triggered when user selects "without wallet" ─────────────
@@ -407,13 +427,16 @@ function LookupApp() {
       setWatchId(watch_id);
       setRelayStealthAddress(relay_stealth_address);
       setFeeBps(fee_bps);
-      localStorage.setItem(WATCH_CACHE_KEY, JSON.stringify({
-        watchId:             watch_id,
-        relayStealthAddress: relay_stealth_address,
-        feeBps:              fee_bps,
-        chainId:             selectedChain,
-        relayUrl,
-      } satisfies WatchCache));
+      localStorage.setItem(
+        WATCH_CACHE_KEY,
+        JSON.stringify({
+          watchId: watch_id,
+          relayStealthAddress: relay_stealth_address,
+          feeBps: fee_bps,
+          chainId: selectedChain,
+          relayUrl,
+        } satisfies WatchCache),
+      );
     } catch (e: unknown) {
       setGaslessError(
         (e as { message?: string })?.message ?? "Relay unavailable",
@@ -503,7 +526,7 @@ function LookupApp() {
             setResolvedAddress(null);
           }}
           onKeyDown={(e) => e.key === "Enter" && handleScan()}
-          placeholder="0x... or ENS"
+          placeholder="0x or ENS"
           style={inputStyle}
         />
 
@@ -923,364 +946,403 @@ function LookupApp() {
         )}
 
         {/* ── Gasless path ─────────────────────────────────────────────────────── */}
-        {sendMode === "gasless" && (stealthResult || relayStealthAddress) && selectedChain && (
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            {/* Phase 1: connecting to relay */}
-            {gaslessStatus === "idle" && (
-              <div
-                style={{
-                  padding: "12px 14px",
-                  background: "#0f0f0f",
-                  border: "1px solid #1f1f1f",
-                  borderRadius: 6,
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 10,
-                }}
-              >
+        {sendMode === "gasless" &&
+          (stealthResult || relayStealthAddress) &&
+          selectedChain && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {/* Phase 1: connecting to relay */}
+              {gaslessStatus === "idle" && (
                 <div
                   style={{
-                    width: 10,
-                    height: 10,
-                    border: "1.5px solid #1f1f1f",
-                    borderTop: "1.5px solid #818cf8",
-                    borderRadius: "50%",
-                    animation: "spin 1s linear infinite",
-                    flexShrink: 0,
+                    padding: "12px 14px",
+                    background: "#0f0f0f",
+                    border: "1px solid #1f1f1f",
+                    borderRadius: 6,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 10,
                   }}
-                />
-                <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
-                <p style={{ fontSize: 10, color: "#555" }}>
-                  connecting to relay…
-                </p>
-              </div>
-            )}
-
-            {/* Phase 2: relay address + status */}
-            {gaslessStatus !== "idle" &&
-              gaslessStatus !== "announced" &&
-              gaslessStatus !== "failed" &&
-              relayStealthAddress && (
-                <>
+                >
                   <div
                     style={{
-                      padding: "14px 16px",
-                      background: "#0d1a0d",
-                      border: "1px solid #1a3a1a",
-                      borderRadius: 6,
+                      width: 10,
+                      height: 10,
+                      border: "1.5px solid #1f1f1f",
+                      borderTop: "1.5px solid #818cf8",
+                      borderRadius: "50%",
+                      animation: "spin 1s linear infinite",
+                      flexShrink: 0,
                     }}
-                  >
+                  />
+                  <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+                  <p style={{ fontSize: 10, color: "#555" }}>
+                    connecting to relay…
+                  </p>
+                </div>
+              )}
+
+              {/* Phase 2: relay address + status */}
+              {gaslessStatus !== "idle" &&
+                gaslessStatus !== "announced" &&
+                gaslessStatus !== "failed" &&
+                relayStealthAddress && (
+                  <>
                     <div
                       style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        marginBottom: 12,
+                        padding: "14px 16px",
+                        background: "#0d1a0d",
+                        border: "1px solid #1a3a1a",
+                        borderRadius: 6,
                       }}
-                    >
-                      <span
-                        style={{
-                          fontSize: 10,
-                          color: "#555",
-                          letterSpacing: "0.08em",
-                          textTransform: "uppercase",
-                        }}
-                      >
-                        send ETH to
-                      </span>
-                      <button
-                        onClick={() => {
-                          navigator.clipboard.writeText(relayStealthAddress);
-                          setRelayCopied(true);
-                          setTimeout(() => setRelayCopied(false), 2000);
-                        }}
-                        style={{
-                          ...btnSmall,
-                          fontSize: 10,
-                          color: relayCopied ? "#4ade80" : "#888",
-                        }}
-                      >
-                        {relayCopied ? "copied ✓" : "copy"}
-                      </button>
-                    </div>
-                    <div
-                      style={{ display: "flex", gap: 16, alignItems: "center" }}
                     >
                       <div
                         style={{
-                          flexShrink: 0,
-                          padding: 6,
-                          background: "#fff",
-                          borderRadius: 4,
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          marginBottom: 12,
                         }}
                       >
-                        <QRCodeSVG
-                          value={relayStealthAddress}
-                          size={80}
-                          bgColor="#ffffff"
-                          fgColor="#000000"
-                        />
+                        <span
+                          style={{
+                            fontSize: 10,
+                            color: "#555",
+                            letterSpacing: "0.08em",
+                            textTransform: "uppercase",
+                          }}
+                        >
+                          send ETH to
+                        </span>
+                        <button
+                          onClick={() => {
+                            navigator.clipboard.writeText(relayStealthAddress);
+                            setRelayCopied(true);
+                            setTimeout(() => setRelayCopied(false), 2000);
+                          }}
+                          style={{
+                            ...btnSmall,
+                            fontSize: 10,
+                            color: relayCopied ? "#4ade80" : "#888",
+                          }}
+                        >
+                          {relayCopied ? "copied ✓" : "copy"}
+                        </button>
                       </div>
-                      <span
+                      <div
+                        style={{
+                          display: "flex",
+                          gap: 16,
+                          alignItems: "center",
+                        }}
+                      >
+                        <div
+                          style={{
+                            flexShrink: 0,
+                            padding: 6,
+                            background: "#fff",
+                            borderRadius: 4,
+                          }}
+                        >
+                          <QRCodeSVG
+                            value={relayStealthAddress}
+                            size={80}
+                            bgColor="#ffffff"
+                            fgColor="#000000"
+                          />
+                        </div>
+                        <span
+                          style={{
+                            fontSize: 12,
+                            color: "#4ade80",
+                            wordBreak: "break-all",
+                            lineHeight: 1.6,
+                          }}
+                        >
+                          {relayStealthAddress}
+                        </span>
+                      </div>
+                      {feeBps !== null && (
+                        <p
+                          style={{ fontSize: 10, color: "#555", marginTop: 10 }}
+                        >
+                          relay fee:{" "}
+                          <span style={{ color: "#818cf8" }}>
+                            {feeBps / 100}%
+                          </span>
+                        </p>
+                      )}
+                    </div>
+
+                    {gaslessStatus === "watching" && (
+                      <div
+                        style={{
+                          padding: "12px 14px",
+                          background: "#0f0f0f",
+                          border: "1px solid #1f1f1f",
+                          borderRadius: 6,
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 10,
+                        }}
+                      >
+                        <div
+                          style={{
+                            width: 6,
+                            height: 6,
+                            borderRadius: "50%",
+                            background: "#555",
+                            animation: "pulse 2s ease-in-out infinite",
+                            flexShrink: 0,
+                          }}
+                        />
+                        <style>{`@keyframes pulse{0%,100%{opacity:.3}50%{opacity:1}}`}</style>
+                        <p
+                          style={{
+                            fontSize: 10,
+                            color: "#555",
+                            lineHeight: 1.9,
+                          }}
+                        >
+                          Waiting for ETH on{" "}
+                          <span style={{ color: "#818cf8" }}>
+                            {selectedChainInfo?.label}
+                          </span>{" "}
+                          · checking every 15s
+                        </p>
+                      </div>
+                    )}
+
+                    {(gaslessStatus === "received" ||
+                      gaslessStatus === "forwarding") && (
+                      <div
+                        style={{
+                          padding: "12px 14px",
+                          background: "#060c06",
+                          border: "1px solid #1a3a1a",
+                          borderRadius: 6,
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 10,
+                        }}
+                      >
+                        <div
+                          style={{
+                            width: 10,
+                            height: 10,
+                            border: "1.5px solid #1f1f1f",
+                            borderTop: "1.5px solid #4ade80",
+                            borderRadius: "50%",
+                            animation: "spin 1s linear infinite",
+                            flexShrink: 0,
+                          }}
+                        />
+                        <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+                        <p style={{ fontSize: 10, color: "#4ade80" }}>
+                          {gaslessStatus === "received"
+                            ? "// payment detected — forwarding…"
+                            : "// forwarded — announcing on-chain…"}
+                        </p>
+                      </div>
+                    )}
+
+                    {relayUnreachable && (
+                      <div
+                        style={{
+                          padding: "10px 12px",
+                          background: "#1a0505",
+                          border: "1px solid #3d0a0a",
+                          borderRadius: 6,
+                        }}
+                      >
+                        <p
+                          style={{
+                            fontSize: 10,
+                            color: "#f87171",
+                            lineHeight: 1.7,
+                          }}
+                        >
+                          ⚠ Relay unreachable — still watching. Your funds are
+                          safu if already sent.
+                        </p>
+                      </div>
+                    )}
+
+                    {gaslessStatus === "watching" && (
+                      <div
+                        style={{
+                          padding: "8px 12px",
+                          background: "#0a0e1a",
+                          border: "1px solid #1e3a5f",
+                          borderRadius: 6,
+                          fontSize: 10,
+                          color: "#60a5fa",
+                          lineHeight: 1.7,
+                        }}
+                      >
+                        ℹ Send to the address above from any wallet.
+                      </div>
+                    )}
+
+                    {(gaslessStatus === "received" ||
+                      gaslessStatus === "forwarding") && (
+                      <div
+                        style={{
+                          padding: "8px 12px",
+                          background: "#0a0e1a",
+                          border: "1px solid #1e3a5f",
+                          borderRadius: 6,
+                          fontSize: 10,
+                          color: "#60a5fa",
+                          lineHeight: 1.7,
+                        }}
+                      >
+                        ℹ Relay is processing your payment — this may take a
+                        minute.
+                      </div>
+                    )}
+
+                    {gaslessStatus === "watching" && (
+                      <button
+                        onClick={() => {
+                          cancelWatch(watchId);
+                          setWatchId(null);
+                          setSendMode("none");
+                          setGaslessStatus("idle");
+                          setRelayStealthAddress(null);
+                          localStorage.removeItem(WATCH_CACHE_KEY);
+                        }}
+                        style={{
+                          alignSelf: "flex-start",
+                          fontSize: 10,
+                          color: "#555",
+                          background: "none",
+                          border: "none",
+                          cursor: "pointer",
+                          padding: 0,
+                          fontFamily: "monospace",
+                          textDecoration: "underline",
+                        }}
+                      >
+                        ← change
+                      </button>
+                    )}
+                  </>
+                )}
+
+              {/* Phase 3: announced — reveal real stealth */}
+              {gaslessStatus === "announced" &&
+                realStealthRevealed &&
+                selectedChainInfo && (
+                  <div
+                    style={{ display: "flex", flexDirection: "column", gap: 8 }}
+                  >
+                    <div
+                      style={{
+                        padding: "14px 16px",
+                        background: "#060c06",
+                        border: "1px solid #1a3a1a",
+                        borderRadius: 6,
+                      }}
+                    >
+                      <p
+                        style={{
+                          fontSize: 11,
+                          color: "#4ade80",
+                          marginBottom: 10,
+                        }}
+                      >
+                        ✓ sent & announced
+                      </p>
+                      <p
+                        style={{
+                          fontSize: 9,
+                          color: "#555",
+                          textTransform: "uppercase",
+                          letterSpacing: "0.08em",
+                          marginBottom: 6,
+                        }}
+                      >
+                        recipient's stealth address
+                      </p>
+                      <p
                         style={{
                           fontSize: 12,
                           color: "#4ade80",
                           wordBreak: "break-all",
                           lineHeight: 1.6,
+                          marginBottom: 10,
                         }}
                       >
-                        {relayStealthAddress}
-                      </span>
-                    </div>
-                    {feeBps !== null && (
-                      <p style={{ fontSize: 10, color: "#555", marginTop: 10 }}>
-                        relay fee:{" "}
-                        <span style={{ color: "#818cf8" }}>
-                          {feeBps / 100}%
-                        </span>
+                        {realStealthRevealed}
                       </p>
-                    )}
+                      {gaslessTx && (
+                        <a
+                          href={`${selectedChainInfo.explorer}/tx/${gaslessTx}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{
+                            fontSize: 10,
+                            color: "#86efac",
+                            wordBreak: "break-all",
+                          }}
+                        >
+                          {gaslessTx}
+                        </a>
+                      )}
+                    </div>
                   </div>
+                )}
 
-                  {gaslessStatus === "watching" && (
-                    <div
-                      style={{
-                        padding: "12px 14px",
-                        background: "#0f0f0f",
-                        border: "1px solid #1f1f1f",
-                        borderRadius: 6,
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 10,
-                      }}
-                    >
-                      <div
-                        style={{
-                          width: 6,
-                          height: 6,
-                          borderRadius: "50%",
-                          background: "#555",
-                          animation: "pulse 2s ease-in-out infinite",
-                          flexShrink: 0,
-                        }}
-                      />
-                      <style>{`@keyframes pulse{0%,100%{opacity:.3}50%{opacity:1}}`}</style>
-                      <p
-                        style={{ fontSize: 10, color: "#555", lineHeight: 1.9 }}
-                      >
-                        Waiting for ETH on{" "}
-                        <span style={{ color: "#818cf8" }}>
-                          {selectedChainInfo?.label}
-                        </span>{" "}
-                        · checking every 15s
-                      </p>
-                    </div>
-                  )}
-
-                  {(gaslessStatus === "received" ||
-                    gaslessStatus === "forwarding") && (
-                    <div
-                      style={{
-                        padding: "12px 14px",
-                        background: "#060c06",
-                        border: "1px solid #1a3a1a",
-                        borderRadius: 6,
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 10,
-                      }}
-                    >
-                      <div
-                        style={{
-                          width: 10,
-                          height: 10,
-                          border: "1.5px solid #1f1f1f",
-                          borderTop: "1.5px solid #4ade80",
-                          borderRadius: "50%",
-                          animation: "spin 1s linear infinite",
-                          flexShrink: 0,
-                        }}
-                      />
-                      <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
-                      <p style={{ fontSize: 10, color: "#4ade80" }}>
-                        {gaslessStatus === "received"
-                          ? "// payment detected — forwarding…"
-                          : "// forwarded — announcing on-chain…"}
-                      </p>
-                    </div>
-                  )}
-
-                  {relayUnreachable && (
-                    <div
-                      style={{
-                        padding: "10px 12px",
-                        background: "#1a0505",
-                        border: "1px solid #3d0a0a",
-                        borderRadius: 6,
-                      }}
-                    >
-                      <p
-                        style={{
-                          fontSize: 10,
-                          color: "#f87171",
-                          lineHeight: 1.7,
-                        }}
-                      >
-                        ⚠ Relay unreachable — still watching. Your funds are
-                        safu if already sent.
-                      </p>
-                    </div>
-                  )}
-
-
-                  {gaslessStatus === "watching" && (
-                    <div style={{ padding: "8px 12px", background: "#0a0e1a", border: "1px solid #1e3a5f", borderRadius: 6, fontSize: 10, color: "#60a5fa", lineHeight: 1.7 }}>
-                      ℹ Send to the address above from any wallet.
-                    </div>
-                  )}
-
-                  {(gaslessStatus === "received" || gaslessStatus === "forwarding") && (
-                    <div style={{ padding: "8px 12px", background: "#0a0e1a", border: "1px solid #1e3a5f", borderRadius: 6, fontSize: 10, color: "#60a5fa", lineHeight: 1.7 }}>
-                      ℹ Relay is processing your payment — this may take a minute.
-                    </div>
-                  )}
-
-                  {gaslessStatus === "watching" && (
-                    <button
-                      onClick={() => {
-                        cancelWatch(watchId);
-                        setWatchId(null);
-                        setSendMode("none");
-                        setGaslessStatus("idle");
-                        setRelayStealthAddress(null);
-                        localStorage.removeItem(WATCH_CACHE_KEY);
-                      }}
-                      style={{
-                        alignSelf: "flex-start",
-                        fontSize: 10,
-                        color: "#555",
-                        background: "none",
-                        border: "none",
-                        cursor: "pointer",
-                        padding: 0,
-                        fontFamily: "monospace",
-                        textDecoration: "underline",
-                      }}
-                    >
-                      ← change
-                    </button>
-                  )}
-                </>
-              )}
-
-            {/* Phase 3: announced — reveal real stealth */}
-            {gaslessStatus === "announced" &&
-              realStealthRevealed &&
-              selectedChainInfo && (
+              {gaslessStatus === "failed" && (
                 <div
                   style={{ display: "flex", flexDirection: "column", gap: 8 }}
                 >
                   <div
                     style={{
-                      padding: "14px 16px",
-                      background: "#060c06",
-                      border: "1px solid #1a3a1a",
+                      padding: "10px 12px",
+                      background: "#1a0505",
+                      border: "1px solid #3d0a0a",
                       borderRadius: 6,
                     }}
                   >
                     <p
                       style={{
-                        fontSize: 11,
-                        color: "#4ade80",
-                        marginBottom: 10,
+                        fontSize: 10,
+                        color: "#f87171",
+                        marginBottom: 4,
                       }}
                     >
-                      ✓ sent & announced
+                      ✗ Relay failed
                     </p>
-                    <p
-                      style={{
-                        fontSize: 9,
-                        color: "#555",
-                        textTransform: "uppercase",
-                        letterSpacing: "0.08em",
-                        marginBottom: 6,
-                      }}
-                    >
-                      recipient's stealth address
+                    <p style={{ fontSize: 10, color: "#666", lineHeight: 1.7 }}>
+                      {gaslessError}
                     </p>
-                    <p
-                      style={{
-                        fontSize: 12,
-                        color: "#4ade80",
-                        wordBreak: "break-all",
-                        lineHeight: 1.6,
-                        marginBottom: 10,
-                      }}
-                    >
-                      {realStealthRevealed}
-                    </p>
-                    {gaslessTx && (
-                      <a
-                        href={`${selectedChainInfo.explorer}/tx/${gaslessTx}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{
-                          fontSize: 10,
-                          color: "#86efac",
-                          wordBreak: "break-all",
-                        }}
-                      >
-                        {gaslessTx}
-                      </a>
-                    )}
                   </div>
+                  <button
+                    onClick={() => {
+                      setSendMode("none");
+                      setGaslessStatus("idle");
+                      setGaslessError(null);
+                      setRelayStealthAddress(null);
+                    }}
+                    style={{
+                      alignSelf: "flex-start",
+                      fontSize: 10,
+                      color: "#555",
+                      background: "none",
+                      border: "none",
+                      cursor: "pointer",
+                      padding: 0,
+                      fontFamily: "monospace",
+                      textDecoration: "underline",
+                    }}
+                  >
+                    ← change
+                  </button>
                 </div>
               )}
-
-            {gaslessStatus === "failed" && (
-              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                <div
-                  style={{
-                    padding: "10px 12px",
-                    background: "#1a0505",
-                    border: "1px solid #3d0a0a",
-                    borderRadius: 6,
-                  }}
-                >
-                  <p
-                    style={{ fontSize: 10, color: "#f87171", marginBottom: 4 }}
-                  >
-                    ✗ Relay failed
-                  </p>
-                  <p style={{ fontSize: 10, color: "#666", lineHeight: 1.7 }}>
-                    {gaslessError}
-                  </p>
-                </div>
-                <button
-                  onClick={() => {
-                    setSendMode("none");
-                    setGaslessStatus("idle");
-                    setGaslessError(null);
-                    setRelayStealthAddress(null);
-                  }}
-                  style={{
-                    alignSelf: "flex-start",
-                    fontSize: 10,
-                    color: "#555",
-                    background: "none",
-                    border: "none",
-                    cursor: "pointer",
-                    padding: 0,
-                    fontFamily: "monospace",
-                    textDecoration: "underline",
-                  }}
-                >
-                  ← change
-                </button>
-              </div>
-            )}
-          </div>
-        )}
+            </div>
+          )}
 
         {/* ── Wallet path ──────────────────────────────────────────────────────── */}
         {sendMode === "wallet" && stealthResult && selectedChain && (
