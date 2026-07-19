@@ -1,8 +1,4 @@
-import { useNavigate } from "react-router-dom";
-
 export default function Landing() {
-  const navigate = useNavigate();
-
   return (
     <div
       style={{
@@ -17,61 +13,50 @@ export default function Landing() {
         padding: 24,
       }}
     >
-      <div style={{ width: "100%", maxWidth: 520, textAlign: "center" }}>
+      <div style={{ width: "100%", maxWidth: 720, textAlign: "center" }}>
         <img
           src="/logo.png"
-          alt="bauta wallet"
-          style={{ width: 163, marginBottom: 24 }}
+          alt="bauta"
+          style={{ width: "clamp(160px, 18vw, 240px)", marginBottom: 28 }}
         />
 
         <h1
           style={{
-            fontSize: 36,
+            fontSize: "clamp(2.5rem, 6vw, 4.5rem)",
             fontWeight: 700,
             letterSpacing: "-0.03em",
-            marginBottom: 12,
+            marginBottom: 24,
           }}
         >
-          bauta<span style={{ color: "#e5e5e5" }}>.</span>
-          <span style={{ color: "#4f46e5" }}>wallet</span>
+          bauta
         </h1>
 
+        {/* Headline — audience-first, scope-broad (not just payments). */}
         <p
           style={{
-            fontSize: 14,
-            color: "#555",
-            marginBottom: 48,
-            lineHeight: 1.8,
+            fontSize: "clamp(1.25rem, 3vw, 2.25rem)",
+            fontWeight: 600,
+            color: "#e5e5e5",
+            marginBottom: 18,
+            lineHeight: 1.5,
           }}
         >
-          Privacy-first stealth payments
-          <br />
-          Make the trace meaningless
+          The privacy engine for apps, institutions &amp; AI agents
         </p>
 
+        {/* Subtitle — unfolds the scope so "payments" isn't the box. */}
         <p
           style={{
-            fontSize: 11,
-            color: "#333",
+            fontSize: "clamp(0.95rem, 1.5vw, 1.25rem)",
+            color: "#666",
             marginBottom: 48,
-            lineHeight: 1.8,
+            lineHeight: 1.7,
           }}
         >
-          Self-host and unlock{" "}
-          <a
-            href="https://railgun.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{ color: "#4f46e5", textDecoration: "none" }}
-          >
-            RAILGUN
-          </a>{" "}
-          private balances,
-          <br />
-          auto-shield and much more.
-          <br />
+          Private payments, private pools, DeFi, and opt-in compliance. Embeddable in any stack
         </p>
 
+        {/* CTA — early access. Destination TBD; intentionally inert for now. */}
         <div
           style={{
             display: "flex",
@@ -81,15 +66,14 @@ export default function Landing() {
           }}
         >
           <button
-            onClick={() => navigate("/lookup")}
             style={{
-              width: 220,
-              padding: "12px 24px",
+              width: "clamp(220px, 22vw, 280px)",
+              padding: "14px 28px",
               background: "#4f46e5",
               border: "none",
               borderRadius: 6,
               color: "#fff",
-              fontSize: 13,
+              fontSize: "clamp(0.85rem, 1.2vw, 1rem)",
               fontFamily: "monospace",
               cursor: "pointer",
               letterSpacing: "0.05em",
@@ -97,39 +81,28 @@ export default function Landing() {
             onMouseOver={(e) => (e.currentTarget.style.background = "#4338ca")}
             onMouseOut={(e) => (e.currentTarget.style.background = "#4f46e5")}
           >
-            send privately →
+            Get started →
           </button>
-
-          <a
-            href="https://github.com/Bauta-Wallet/bauta-wallet"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              width: 220,
-              padding: "12px 24px",
-              boxSizing: "border-box",
-              background: "none",
-              border: "1px solid #1f1f1f",
-              borderRadius: 6,
-              color: "#555",
-              fontSize: 13,
-              fontFamily: "monospace",
-              cursor: "pointer",
-              letterSpacing: "0.05em",
-              textDecoration: "none",
-              display: "block",
-              textAlign: "center",
-            }}
-            onMouseOver={(e) => (e.currentTarget.style.borderColor = "#333")}
-            onMouseOut={(e) => (e.currentTarget.style.borderColor = "#1f1f1f")}
-          >
-            self-host →
-          </a>
         </div>
 
-        <p style={{ marginTop: 64, fontSize: 10, color: "#333" }}>
-          ERC-5564 · ERC-6538 · open source
-        </p>
+        {/* Trust badge — Kohaku as "built on", not the headline. Drop the fish
+            SVG into public/ and swap the placeholder mark below for an <img>. */}
+        <div
+          style={{
+            marginTop: 64,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 12,
+            fontSize: "clamp(0.7rem, 1vw, 0.9rem)",
+            color: "#444",
+            letterSpacing: "0.04em",
+          }}
+        >
+          <img src="/kohaku.svg" alt="Kohaku" style={{ height: "clamp(48px, 7vw, 88px)" }} />
+          <span>Built on Ethereum&apos;s Kohaku</span>
+        </div>
       </div>
 
       <a
