@@ -1,46 +1,42 @@
-# bauta.wallet
+# bauta · app
 
-Privacy-first stealth payments. Make the trace meaningless.
+The public landing for **Bauta**, the privacy engine for apps & AI agents.
+Deployed at [bautawallet.com](https://bautawallet.com).
 
-Live at [bautawallet.com](https://bautawallet.com) *(coming soon)*
+> **Status: repurposed, work in progress.**
+> This repo used to be a stealth-payments web app. It is being turned into the
+> showcase site for the [Bauta SDK](https://github.com/bauta-labs/sdk).
+> Right now it is a single landing page, nothing more.
 
-## What it is
+## What it is (today)
 
-Web app for sending ETH privately using stealth addresses — ERC-5564 + ERC-6538.
+- `/` renders the landing (`src/Landing.tsx`), "Built on Ethereum's Kohaku".
+- Every other path redirects back to `/`.
 
-- `/` — landing page
-- `/lookup` — stealth address lookup & send
+The landing is the whole product surface for now.
 
-Supports Classic (secp256k1) and Post-Quantum (ML-KEM-768) schemes across 8 EVM chains.
+## Where things live
 
-## Without wallet mode
-
-Send from any wallet — a relay handles the on-chain announce. The relay is configurable: use the official one or [run your own](https://github.com/ivanmmurciaua/bauta-wallet).
+- **SDK + docs:** the sibling repo [`bauta-labs/sdk`](https://github.com/bauta-labs/sdk).
+- **This repo (`app`):** just the landing / showcase.
+- The `bautawallet.com` domain keeps the word "wallet". That gets reconciled
+  later by shipping a small demo / PoC here that runs on the Bauta SDK.
 
 ## Tech stack
 
-- React 19 + TypeScript + Vite
-- Viem + Wagmi + React Router
-- @noble/secp256k1, @noble/post-quantum, @noble/hashes
+- React 19 + TypeScript + Vite, React Router
+- Viem + Wagmi
+- `@vercel/analytics`
 
 ## Dev
+
+Plain Vite app, so `dev` is fine here.
 
 ```bash
 bun install
 bun run dev       # http://localhost:5173
 bun run build
 ```
-
-## Environment variables
-
-```bash
-VITE_RELAY_URL    # URL of bauta-relay instance (default: official relay)
-```
-
-## Related
-
-- [bauta-wallet](https://github.com/Bauta-Wallet/bauta-wallet) — self-host service (stealth wallet + watcher + relay + RAILGUN)
-- [bauta-lookup-ipfs](https://codeberg.org/ivanmmurcia/bauta-lookup) — IPFS version (no relay, fully decentralized)
 
 ## License
 

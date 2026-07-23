@@ -667,7 +667,7 @@ function LookupApp() {
               <br />
               Do it with{" "}
               <a
-                href="https://github.com/Bauta-Wallet/bauta-wallet"
+                href="https://github.com/bauta-labs"
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{ color: "#818cf8", textDecoration: "none" }}
