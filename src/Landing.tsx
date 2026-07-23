@@ -31,7 +31,7 @@ export default function Landing() {
           bauta
         </h1>
 
-        {/* Headline — audience-first, scope-broad (not just payments). */}
+        {/* Headline: beachhead audience (apps + AI agents). */}
         <p
           style={{
             fontSize: "clamp(1.25rem, 3vw, 2.25rem)",
@@ -41,10 +41,10 @@ export default function Landing() {
             lineHeight: 1.5,
           }}
         >
-          The privacy engine for apps, institutions &amp; AI agents
+          The privacy engine for apps &amp; AI agents
         </p>
 
-        {/* Subtitle — unfolds the scope so "payments" isn't the box. */}
+        {/* Subtitle: the angle (engine, not a wallet), not a feature list. */}
         <p
           style={{
             fontSize: "clamp(0.95rem, 1.5vw, 1.25rem)",
@@ -53,10 +53,11 @@ export default function Landing() {
             lineHeight: 1.7,
           }}
         >
-          Private payments, private pools, DeFi, and opt-in compliance. Embeddable in any stack
+          Private by default for any account you already use. Bring your own
+          wallet, Bauta adds the privacy layer. Embeddable in any stack.
         </p>
 
-        {/* CTA — early access. Destination TBD; intentionally inert for now. */}
+        {/* CTA: links to the live docs. */}
         <div
           style={{
             display: "flex",
@@ -65,7 +66,8 @@ export default function Landing() {
             alignItems: "center",
           }}
         >
-          <button
+          <a
+            href="https://bauta-labs.github.io/sdk"
             style={{
               width: "clamp(220px, 22vw, 280px)",
               padding: "14px 28px",
@@ -77,15 +79,29 @@ export default function Landing() {
               fontFamily: "monospace",
               cursor: "pointer",
               letterSpacing: "0.05em",
+              textDecoration: "none",
+              display: "inline-block",
+              boxSizing: "border-box",
+              textAlign: "center",
             }}
             onMouseOver={(e) => (e.currentTarget.style.background = "#4338ca")}
             onMouseOut={(e) => (e.currentTarget.style.background = "#4f46e5")}
           >
             Get started →
-          </button>
+          </a>
+
+          <span
+            style={{
+              fontSize: "clamp(0.7rem, 1vw, 0.85rem)",
+              color: "#555",
+              letterSpacing: "0.04em",
+            }}
+          >
+            For institutions: coming soon
+          </span>
         </div>
 
-        {/* Trust badge — Kohaku as "built on", not the headline. Drop the fish
+        {/* Trust badge: Kohaku as "built on", not the headline. Drop the fish
             SVG into public/ and swap the placeholder mark below for an <img>. */}
         <div
           style={{
